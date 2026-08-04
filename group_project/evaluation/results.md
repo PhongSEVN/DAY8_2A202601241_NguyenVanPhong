@@ -6,30 +6,15 @@ RAGAS (`pip install ragas`)
 
 ---
 
-## Trạng thái
-
-> Chưa chạy thật — pipeline (`src/task9_retrieval_pipeline.py`, `src/task10_generation.py`)
-> đang phụ thuộc Task 5-8 (chưa implement) nên `generate_with_citation()` còn raise
-> `NotImplementedError`. `eval_pipeline.py` đã code đầy đủ (RAGAS 4 metrics + A/B
-> hybrid_rerank vs dense_only) và đã smoke-test cơ chế export bằng data giả — chỉ cần
-> chạy `python -m group_project.evaluation.eval_pipeline` sau khi:
-> 1. Task 4 index xong `chroma_db/`
-> 2. Task 5-8 implement xong
-> 3. `.env` có `OPENROUTER_API_KEY` hợp lệ
->
-> Script sẽ tự ghi đè phần dưới bằng số liệu thật.
-
----
-
 ## Overall Scores
 
 | Metric | Config A (hybrid + rerank) | Config B (dense-only) | Δ |
 |--------|---------------------------|----------------------|---|
-| Faithfulness | | | |
-| Answer Relevance | | | |
-| Context Recall | | | |
-| Context Precision | | | |
-| **Average** | | | |
+| faithfulness | 0.000 | nan | +nan |
+| answer_relevancy | 0.332 | 0.407 | -0.075 |
+| context_recall | 1.000 | 1.000 | +0.000 |
+| context_precision | 0.917 | 0.917 | +0.000 |
+| **Average** | **0.562** | **nan** | **+nan** |
 
 ---
 
@@ -39,8 +24,7 @@ RAGAS (`pip install ragas`)
 
 **Config B (dense_only):** chỉ semantic search (dense retrieval), không BM25, không rerank.
 
-**Kết luận:**
-> Điền sau khi chạy với data thật.
+**Kết luận:** Config B có average score cao hơn (0.562 vs 0.562). Điền phân tích chi tiết sau khi chạy với data thật (vì sao rerank/hybrid giúp hay không giúp).
 
 ---
 
@@ -48,16 +32,16 @@ RAGAS (`pip install ragas`)
 
 | # | Question | Faithfulness | Relevance | Recall | Failure Stage | Root Cause |
 |---|----------|-------------|-----------|--------|---------------|------------|
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
+| 1 | Automation bias là gì theo bài viết của TS Nhật Quang Trần? | nan | 0.000 | nan | | |
+| 2 | RMIT đứng thứ mấy trong số các trường đại học Úc theo QS WUR | 0.000 | 0.664 | 1.000 | | |
+| 3 | RMIT xếp hạng bao nhiêu trong bảng QS World University Ranki | nan | nan | 1.000 | | |
 
 ---
 
 ## Recommendations
 
 ### Cải tiến 1
-**Action:**
+**Action:** Điền sau khi phân tích worst performers.
 **Expected impact:**
 
 ### Cải tiến 2
