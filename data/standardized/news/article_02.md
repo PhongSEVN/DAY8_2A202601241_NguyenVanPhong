@@ -47,3 +47,4 @@ Robust legal and regulatory frameworks are essential to govern AI development. T
 Automation bias is a danger quietly shaping how we trust and rely on machines. To live safely with AI, we must keep a sharp mind and verify what it says before accepting it.
 
 Story: Dr Nhat-Quang Tran, Lecturer in IT, School of Science, Engineering & Technology, RMIT University Vietnam
+Story: Dr Nhat-Quang Tran, Lecturer in IT, School of Science, Engineering & Technology, RMIT University Vietnam
