@@ -15,10 +15,56 @@ BM25 hoạt động thế nào:
     - k1=1.5 (term saturation), b=0.75 (length normalization)
 """
 
+import json
 from pathlib import Path
 
-# TODO: Load corpus từ data/standardized/ hoặc từ vector store
-CORPUS: list[dict] = []  # List of {'content': str, 'metadata': dict}
+from rank_bm25 import BM25Okapi
+
+STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
+NEWS_LANDING_DIR = Path(__file__).parent.parent / "data" / "landing" / "news"
+
+
+def _load_corpus() -> list[dict]:
+    """
+    Đọc corpus từ data/standardized/ (output Task 3). Nếu chưa có (Task 3
+    chưa chạy), fallback đọc trực tiếp field 'content_markdown' trong
+    data/landing/news/*.json để module vẫn dùng được độc lập.
+    """
+    corpus = []
+
+    for md_file in STANDARDIZED_DIR.rglob("*.md"):
+        text = md_file.read_text(encoding="utf-8").strip()
+        if not text:
+            continue
+        doc_type = "legal" if "legal" in str(md_file) else "news"
+        corpus.append({
+            "content": text,
+            "metadata": {"source": md_file.name, "type": doc_type},
+        })
+
+    if corpus:
+        return corpus
+
+    for json_file in NEWS_LANDING_DIR.glob("*.json"):
+        data = json.loads(json_file.read_text(encoding="utf-8"))
+        text = data.get("content_markdown", "").strip()
+        if not text:
+            continue
+        corpus.append({
+            "content": text,
+            "metadata": {
+                "source": json_file.name,
+                "type": "news",
+                "title": data.get("title", ""),
+                "url": data.get("url", ""),
+            },
+        })
+
+    return corpus
+
+
+CORPUS: list[dict] = _load_corpus()
+_BM25_INDEX = None
 
 
 def build_bm25_index(corpus: list[dict]):
@@ -28,15 +74,15 @@ def build_bm25_index(corpus: list[dict]):
     Args:
         corpus: List of {'content': str, 'metadata': dict}
     """
-    # TODO: Implement BM25 index
-    #
-    # from rank_bm25 import BM25Okapi
-    #
-    # # Tokenize - có thể đơn giản split(), hoặc dùng underthesea cho tiếng Việt
-    # tokenized_corpus = [doc["content"].lower().split() for doc in corpus]
-    # bm25 = BM25Okapi(tokenized_corpus)
-    # return bm25
-    raise NotImplementedError("Implement build_bm25_index")
+    tokenized_corpus = [doc["content"].lower().split() for doc in corpus]
+    return BM25Okapi(tokenized_corpus)
+
+
+def _get_index():
+    global _BM25_INDEX
+    if _BM25_INDEX is None and CORPUS:
+        _BM25_INDEX = build_bm25_index(CORPUS)
+    return _BM25_INDEX
 
 
 def lexical_search(query: str, top_k: int = 10) -> list[dict]:
@@ -55,29 +101,28 @@ def lexical_search(query: str, top_k: int = 10) -> list[dict]:
         }
         Sorted by score descending.
     """
-    # TODO: Implement lexical search
-    #
-    # tokenized_query = query.lower().split()
-    # scores = bm25.get_scores(tokenized_query)
-    #
-    # # Get top_k indices
-    # import numpy as np
-    # top_indices = np.argsort(scores)[::-1][:top_k]
-    #
-    # results = []
-    # for idx in top_indices:
-    #     if scores[idx] > 0:
-    #         results.append({
-    #             "content": CORPUS[idx]["content"],
-    #             "score": float(scores[idx]),
-    #             "metadata": CORPUS[idx]["metadata"]
-    #         })
-    # return results
-    raise NotImplementedError("Implement lexical_search")
+    if not CORPUS:
+        return []
+
+    bm25 = _get_index()
+    tokenized_query = query.lower().split()
+    scores = bm25.get_scores(tokenized_query)
+
+    ranked_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
+
+    results = []
+    for idx in ranked_indices[:top_k]:
+        if scores[idx] <= 0:
+            continue
+        results.append({
+            "content": CORPUS[idx]["content"],
+            "score": float(scores[idx]),
+            "metadata": CORPUS[idx]["metadata"],
+        })
+    return results
 
 
 if __name__ == "__main__":
-    # Test
     results = lexical_search("tuition fee payment methods", top_k=5)
     for r in results:
         print(f"[{r['score']:.3f}] {r['content'][:100]}...")
