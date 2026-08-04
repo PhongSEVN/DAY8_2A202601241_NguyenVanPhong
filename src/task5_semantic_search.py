@@ -9,6 +9,31 @@ Yêu cầu:
     - Phải tương thích với embedding model và vector store ở Task 4
 """
 
+from functools import lru_cache
+
+
+@lru_cache(maxsize=1)
+def _get_embedding_model():
+    from sentence_transformers import SentenceTransformer
+    try:
+        from .task4_chunking_indexing import EMBEDDING_MODEL
+    except ImportError:
+        from task4_chunking_indexing import EMBEDDING_MODEL
+
+    return SentenceTransformer(EMBEDDING_MODEL)
+
+
+@lru_cache(maxsize=1)
+def _get_collection():
+    import chromadb
+    try:
+        from .task4_chunking_indexing import CHROMA_DIR, COLLECTION_NAME
+    except ImportError:
+        from task4_chunking_indexing import CHROMA_DIR, COLLECTION_NAME
+
+    client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+    return client.get_collection(name=COLLECTION_NAME)
+
 
 def semantic_search(query: str, top_k: int = 10) -> list[dict]:
     """
@@ -26,35 +51,39 @@ def semantic_search(query: str, top_k: int = 10) -> list[dict]:
         }
         Sorted by score descending.
     """
-    # TODO: Implement semantic search
-    #
-    # Bước 1: Embed query bằng cùng model ở Task 4
-    # Bước 2: Query vector store (cosine similarity)
-    # Bước 3: Return top_k results
-    #
-    # Ví dụ với ChromaDB:
-    # from .task4_chunking_indexing import get_collection, get_embedding_model
-    #
-    # model = get_embedding_model()
-    # query_vector = model.encode(query).tolist()
-    #
-    # collection = get_collection()
-    # results = collection.query(
-    #     query_embeddings=[query_vector],
-    #     n_results=top_k,
-    #     include=["documents", "metadatas", "distances"],
-    # )
-    #
-    # output = []
-    # for doc, meta, dist in zip(
-    #     results["documents"][0], results["metadatas"][0], results["distances"][0]
-    # ):
-    #     score = max(0.0, 1.0 - dist)  # cosine distance → similarity
-    #     output.append({"content": doc, "score": round(score, 4), "metadata": meta})
-    #
-    # output.sort(key=lambda x: x["score"], reverse=True)
-    # return output[:top_k]
-    raise NotImplementedError("Implement semantic_search")
+    if not isinstance(query, str) or not query.strip():
+        return []
+    if top_k <= 0:
+        return []
+
+    model = _get_embedding_model()
+    query_vector = model.encode(
+        query.strip(), normalize_embeddings=True
+    ).tolist()
+
+    collection = _get_collection()
+    if collection.count() == 0:
+        return []
+
+    results = collection.query(
+        query_embeddings=[query_vector],
+        n_results=min(top_k, collection.count()),
+        include=["documents", "metadatas", "distances"],
+    )
+
+    output = []
+    documents = results.get("documents", [[]])[0]
+    metadatas = results.get("metadatas", [[]])[0]
+    distances = results.get("distances", [[]])[0]
+
+    for content, metadata, distance in zip(documents, metadatas, distances):
+        output.append({
+            "content": content,
+            "score": round(max(0.0, 1.0 - float(distance)), 4),
+            "metadata": metadata or {},
+        })
+
+    return sorted(output, key=lambda item: item["score"], reverse=True)
 
 
 if __name__ == "__main__":
