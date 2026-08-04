@@ -28,6 +28,10 @@ openai>=1.30.0
 # Group project - UI
 streamlit>=1.35.0
 
+# Group project - React client backend (server.py)
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+
 # Group project - Evaluation
 ragas==0.1.21
 datasets>=2.14.0
