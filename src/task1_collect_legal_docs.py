@@ -33,22 +33,49 @@ def setup_directory():
     print(f"✓ Thư mục đã sẵn sàng: {DATA_DIR}")
 
 
-# TODO: Tải file PDF/DOCX về DATA_DIR
-# Có thể tải thủ công hoặc viết script download nếu có direct link.
-#
-# Ví dụ nếu có direct link:
-#
-# import requests
-#
-# def download_file(url: str, filename: str):
-#     response = requests.get(url)
-#     filepath = DATA_DIR / filename
-#     filepath.write_bytes(response.content)
-#     print(f"✓ Đã tải: {filepath}")
-#
-# Nếu trang là HTML thuần (không phải PDF sẵn), có thể convert nội dung text
-# thành PDF đơn giản bằng thư viện fpdf2 (đã có trong requirements.txt).
+import requests
+
+# Direct PDF links xac nhan tu trang cong khai RMIT Vietnam (rmit.edu.vn).
+DOCS = [
+    (
+        "https://www.rmit.edu.vn/assets/vn/en/assets-for-production/documents/pdfs/"
+        "study-at-rmit/tuition-fees/student-fees-and-charges-guide-06-2026.pdf",
+        "tuition-fees-rmit.pdf",
+    ),
+    (
+        "https://www.rmit.edu.vn/content/dam/rmit/vn/en/assets-for-production/documents/pdfs/"
+        "study-at-rmit/scholarships/english-pdf/"
+        "rmit-university-vietnam-scholarship-terms-and-conditions.pdf",
+        "academic-achievement-scholarship-rmit.pdf",
+    ),
+    (
+        "https://www.rmit.edu.vn/assets/vn/en/assets-for-production/documents/pdfs/"
+        "academic-calendar/academic-calendar-2026-jun26.pdf",
+        "academic-calendar-rmit.pdf",
+    ),
+]
+
+HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; RAGLabBot/1.0)"}
+
+
+def download_file(url: str, filename: str):
+    """Tai 1 file ve DATA_DIR, bo qua neu da ton tai."""
+    filepath = DATA_DIR / filename
+    if filepath.exists() and filepath.stat().st_size > 0:
+        print(f"= Da co san: {filepath}")
+        return
+
+    response = requests.get(url, headers=HEADERS, timeout=30)
+    response.raise_for_status()
+    filepath.write_bytes(response.content)
+    print(f"OK Da tai: {filepath} ({len(response.content)} bytes)")
+
+
+def collect_all():
+    setup_directory()
+    for url, filename in DOCS:
+        download_file(url, filename)
 
 
 if __name__ == "__main__":
-    setup_directory()
+    collect_all()
