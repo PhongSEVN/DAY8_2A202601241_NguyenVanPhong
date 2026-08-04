@@ -26,3 +26,5 @@ pageindex_pdfs/
 .DS_Store
 Thumbs.db
 .claude
+.agents
+skills-lock.json

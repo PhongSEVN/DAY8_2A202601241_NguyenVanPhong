@@ -1,0 +1,34 @@
+# The hidden psychology behind older consumers' digital payment choices
+
+**Source:** https://www.rmit.edu.vn/news/all-news/2026/aug/the-hidden-psychology-behind-older-consumers-digital-payment-choices
+**Crawled:** 2026-08-04T00:00:00
+
+---
+
+# The hidden psychology behind older consumers' digital payment choices
+
+Why do some older consumers readily embrace digital payments while others remain hesitant? Emerging research suggests the answer may lie in the psychological factors that shape how people respond to change.
+
+Vietnam's cashless economy is no longer a glimpse of the future. From supermarkets and cafes to neighbourhood markets and street food vendors, a quick QR code scan has become part of everyday life. According to the State Bank of Vietnam, non-cash payment transactions increased by more than 34% year on year in the first five months of 2026, while QR code payments climbed nearly 40%, making Vietnam one of Southeast Asia's fastest-growing digital payment markets.
+
+Under Vietnam's National Financial Inclusion Strategy for 2026-2030, the government aims for cashless payment values to reach 30 times GDP by the end of the decade, while 95% of people aged 15 and above are expected to have bank accounts.
+
+Digital Marketing lecturers Dr Jasper Teow and Dr Nguyen Thi Van Anh are exploring how older adults respond to change in an increasingly digital world. Their latest study, based on a survey of 400 adults in the United Kingdom and the United States, found that digital skills alone do not explain why people adopt or avoid digital payments.
+
+## Why confidence matters more than digital skills
+
+One psychological factor identified in the study is ageing-related helplessness, a feeling that as people age, they may feel less able to cope with new challenges, solve unexpected problems or stay in control when faced with unfamiliar situations.
+
+"For some older consumers, the biggest barrier isn't the technology itself. Sometimes it's the feeling that you're no longer as capable of adapting as you once were," said Dr Jasper Teow.
+
+The research also uncovered a more optimistic story. Older adults who demonstrated higher levels of wisdom, the ability to draw on life experience and remain open to new perspectives when facing challenges, were significantly more willing to embrace digital payment technologies.
+
+"Technology will continue to evolve, but what matters most is whether people believe they can keep learning. That belief is the true foundation of digital inclusion", said Dr Nguyen Thi Van Anh.
+
+## Building confidence in a cashless future
+
+Making payment apps simpler is important, but confidence deserves equal attention. Features such as guided onboarding, clearer confirmation screens, and easy ways to recover from mistakes can reassure users that they remain in control.
+
+Families have an equally important role. Many older adults first learn to use digital technologies from their children or grandchildren. Support should not become substitution; providing guidance, practising together and allowing older family members to complete transactions themselves can help build their confidence and independence.
+
+Dr Hoang Ai Phuong, RMIT Senior Program Manager for Digital Marketing, said: "As Vietnam becomes more digital while its population ages, the real measure of inclusion is whether older consumers feel they can keep learning, stay in control, and participate confidently in the digital economy."
