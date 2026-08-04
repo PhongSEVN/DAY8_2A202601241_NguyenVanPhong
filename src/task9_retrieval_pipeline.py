@@ -98,7 +98,11 @@ def retrieve(
     best_score = dense_results[0]["score"] if dense_results else 0.0
     if best_score < score_threshold:
         print(f"  fallback: semantic best score ({best_score:.3f}) < threshold ({score_threshold})")
-        fallback = pageindex_search(query, top_k=top_k)
+        try:
+            fallback = pageindex_search(query, top_k=top_k)
+        except Exception as exc:
+            print(f"  pageindex fallback failed ({exc}), giữ nguyên hybrid results")
+            fallback = []
         if fallback:
             for item in fallback:
                 item.setdefault("source", "pageindex")

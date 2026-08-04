@@ -38,6 +38,40 @@ def load_golden_dataset() -> list[dict]:
 
 
 # =============================================================================
+# RAGAS Judge LLM/Embeddings (OpenRouter — không cần OPENAI_API_KEY riêng)
+# =============================================================================
+
+def build_ragas_judge():
+    """
+    RAGAS mặc định dùng OpenAI (ChatOpenAI + OpenAIEmbeddings) làm "judge" để
+    chấm điểm — nhưng .env của nhóm chỉ có OPENROUTER_API_KEY, không có
+    OPENAI_API_KEY. Nên phải tự trỏ ChatOpenAI sang OpenRouter base_url, và
+    dùng lại embedding model local (BAAI/bge-m3, đã cài cho Task 4/5) thay vì
+    OpenAIEmbeddings để không phụ thuộc thêm API trả phí.
+
+    Returns:
+        (llm, embeddings) — đã wrap theo interface ragas cần cho evaluate().
+    """
+    from langchain_openai import ChatOpenAI
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+    from ragas.llms import LangchainLLMWrapper
+    from ragas.embeddings import LangchainEmbeddingsWrapper
+
+    api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
+    judge_model = os.getenv("RAGAS_JUDGE_MODEL") or os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+
+    chat = ChatOpenAI(
+        model=judge_model,
+        api_key=api_key,
+        base_url="https://openrouter.ai/api/v1",
+        temperature=0.0,
+    )
+    hf_embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-m3")
+
+    return LangchainLLMWrapper(chat), LangchainEmbeddingsWrapper(hf_embeddings)
+
+
+# =============================================================================
 # Option 1: DeepEval
 # =============================================================================
 
@@ -118,9 +152,12 @@ def evaluate_with_ragas(rag_pipeline, golden_dataset: list[dict]):
         eval_data["ground_truth"].append(item["expected_answer"])
 
     dataset = Dataset.from_dict(eval_data)
+    judge_llm, judge_embeddings = build_ragas_judge()
     result = evaluate(
         dataset,
         metrics=[faithfulness, answer_relevancy, context_recall, context_precision],
+        llm=judge_llm,
+        embeddings=judge_embeddings,
     )
     return result.to_pandas()
 
@@ -168,26 +205,37 @@ def evaluate_with_trulens(rag_pipeline, golden_dataset: list[dict]) -> dict:
 def _generate_for_config(query: str, top_k: int, use_reranking: bool) -> dict:
     """
     Chạy generation cho 1 config cụ thể, tái dùng prompt/LLM call logic của
-    Task 10 (SYSTEM_PROMPT, reorder_for_llm, format_context, LLM_MODEL...)
+    Task 10 (SYSTEM_PROMPT, reorder_for_llm, format_context, create_llm_client...)
     nhưng cho phép bật/tắt reranking ở tầng retrieval — generate_with_citation()
     gốc không expose tham số này nên A/B so sánh reranking phải gọi retrieve()
     trực tiếp rồi lắp lại phần format/LLM giống Task 10.
+
+    Lưu ý: retrieve() có thể raise nếu PAGEINDEX_API_KEY chưa cấu hình và câu hỏi
+    kích hoạt fallback (score cosine < threshold) — bắt lỗi ở đây giống cách
+    generate_with_citation() làm, để A/B eval không crash giữa chừng vì 1-2 câu
+    ngoài domain trong golden_dataset.json.
     """
     from src.task9_retrieval_pipeline import retrieve
     from src.task10_generation import (
-        SYSTEM_PROMPT, LLM_MODEL, TEMPERATURE, TOP_P,
-        reorder_for_llm, format_context,
+        SYSTEM_PROMPT, TEMPERATURE, TOP_P,
+        reorder_for_llm, format_context, create_llm_client,
+        CANNOT_VERIFY_MESSAGE,
     )
-    from openai import OpenAI
 
-    chunks = retrieve(query, top_k=top_k, use_reranking=use_reranking)
+    try:
+        chunks = retrieve(query, top_k=top_k, use_reranking=use_reranking)
+    except Exception as exc:
+        return {"answer": f"{CANNOT_VERIFY_MESSAGE} Lỗi retrieval: {exc}", "sources": []}
+
     reordered = reorder_for_llm(chunks) if chunks else []
     context = format_context(reordered) if reordered else ""
 
-    api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
-    client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
+    if not context:
+        return {"answer": CANNOT_VERIFY_MESSAGE, "sources": chunks}
+
+    client, model, _provider = create_llm_client()
     response = client.chat.completions.create(
-        model=LLM_MODEL,
+        model=model,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": f"Context:\n{context}\n\n---\n\nQuestion: {query}"},
@@ -195,7 +243,8 @@ def _generate_for_config(query: str, top_k: int, use_reranking: bool) -> dict:
         temperature=TEMPERATURE,
         top_p=TOP_P,
     )
-    return {"answer": response.choices[0].message.content, "sources": chunks}
+    answer = (response.choices[0].message.content or "").strip() or CANNOT_VERIFY_MESSAGE
+    return {"answer": answer, "sources": chunks}
 
 
 def compare_configs(golden_dataset: list[dict]) -> dict:
@@ -219,6 +268,8 @@ def compare_configs(golden_dataset: list[dict]) -> dict:
         "dense_only": False,
     }
 
+    judge_llm, judge_embeddings = build_ragas_judge()
+
     results = {}
     for config_name, use_reranking in configs.items():
         eval_data = {"question": [], "answer": [], "contexts": [], "ground_truth": []}
@@ -226,13 +277,15 @@ def compare_configs(golden_dataset: list[dict]) -> dict:
             result = _generate_for_config(item["question"], top_k=5, use_reranking=use_reranking)
             eval_data["question"].append(item["question"])
             eval_data["answer"].append(result["answer"])
-            eval_data["contexts"].append([c["content"] for c in result["sources"]])
+            eval_data["contexts"].append([c["content"] for c in result["sources"]] or [""])
             eval_data["ground_truth"].append(item["expected_answer"])
 
         dataset = Dataset.from_dict(eval_data)
         scored = evaluate(
             dataset,
             metrics=[faithfulness, answer_relevancy, context_recall, context_precision],
+            llm=judge_llm,
+            embeddings=judge_embeddings,
         )
         results[config_name] = scored.to_pandas()
 
@@ -318,6 +371,13 @@ if __name__ == "__main__":
 
     golden_dataset = load_golden_dataset()
     print(f"Loaded {len(golden_dataset)} test cases")
+
+    # EVAL_SAMPLE_SIZE: cho phép chạy subset khi bị rate-limit (xem cảnh báo đầu
+    # file) mà không phải sửa golden_dataset.json — mặc định chạy full dataset.
+    sample_size = os.getenv("EVAL_SAMPLE_SIZE")
+    if sample_size:
+        golden_dataset = golden_dataset[: int(sample_size)]
+        print(f"EVAL_SAMPLE_SIZE set -> chỉ chạy {len(golden_dataset)} câu (rate-limit safety)")
 
     results_df = evaluate_with_ragas(pipeline, golden_dataset)
     comparison_dfs = compare_configs(golden_dataset)
