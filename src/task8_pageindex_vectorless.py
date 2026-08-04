@@ -124,8 +124,11 @@ def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
         retrieval_id = resp.get("retrieval_id") or resp.get("id")
 
         retrieval = client.get_retrieval(retrieval_id)
-        while retrieval.get("status") not in ("completed", "failed"):
+        max_wait_seconds = 60
+        elapsed = 0
+        while retrieval.get("status") not in ("completed", "failed") and elapsed < max_wait_seconds:
             time.sleep(1)
+            elapsed += 1
             retrieval = client.get_retrieval(retrieval_id)
 
         if retrieval.get("status") != "completed":
