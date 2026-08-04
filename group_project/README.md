@@ -69,8 +69,17 @@ Xem code mẫu (DeepEval/RAGAS/TruLens) chi tiết trong `README.md` gốc mục
 
 ## Kiến Trúc Hệ Thống
 
+> Xem diagram đầy đủ trong [README.md gốc, mục "Kiến Trúc Hệ Thống"](../README.md#kiến-trúc-hệ-thống).
+
+Tóm tắt luồng chính:
+
 ```
-[Vẽ diagram kiến trúc ở đây]
+Client (React/Vite) → FastAPI (server.py)
+  → Task 10 generate_with_citation()
+      → Task 9 retrieve(): Task 5 (semantic) + Task 6 (BM25) → Task 7 (RRF k=60 + rerank)
+        → cosine gốc < 0.48 ? → Task 8 PageIndex fallback : dùng kết quả hybrid
+      → reorder_for_llm() + format_context() → OpenAI gpt-4o-mini
+  → answer + citations + confidence → hiển thị chat
 ```
 
 ---

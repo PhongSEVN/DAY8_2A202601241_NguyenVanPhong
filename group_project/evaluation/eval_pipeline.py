@@ -24,17 +24,59 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+from openai import RateLimitError
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_random_exponential
 
 load_dotenv()
 
+# Retry rieng cho loi 429 (TPM/RPM rate limit) — RAGAS/OpenAI khong tu retry loi
+# nay theo mac dinh, backoff exponential 4-60s, toi da 5 lan thu.
+_rate_limit_retry = retry(
+    retry=retry_if_exception_type(RateLimitError),
+    wait=wait_random_exponential(min=4, max=60),
+    stop=stop_after_attempt(5),
+    reraise=True,
+)
+
 GOLDEN_DATASET_PATH = Path(__file__).parent / "golden_dataset.json"
 RESULTS_PATH = Path(__file__).parent / "results.md"
+
+# An toan rate-limit: gpt-4o-mini gioi han 200k token/phut (TPM) theo to chuc.
+# RAGAS goi LLM nhieu lan/cau hoi/metric, compare_configs() chay 2 config (x2
+# tong so cau hoi) — de 5 cau da co the cham TPM. Mac dinh chi lay N cau dau
+# golden_dataset de "chay thu la ra ket qua" ma khong dot quota chung ca nhom.
+# Set EVAL_SAMPLE_SIZE=0 de chay full dataset khi TPM/credit du.
+EVAL_SAMPLE_SIZE = int(os.getenv("EVAL_SAMPLE_SIZE", "3"))
 
 
 def load_golden_dataset() -> list[dict]:
     """Load golden dataset từ JSON file."""
     with open(GOLDEN_DATASET_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+        data = json.load(f)
+    if EVAL_SAMPLE_SIZE:
+        return data[:EVAL_SAMPLE_SIZE]
+    return data
+
+
+def get_ragas_judge():
+    """
+    RAGAS mac dinh dung ChatOpenAI/OpenAIEmbeddings tro thang api.openai.com,
+    doc OPENAI_API_KEY. Ca LLM judge va embeddings deu goi thang OpenAI (khong
+    qua OpenRouter — da bo do OpenRouter het credit/402), cung model voi Task 10
+    (chat) va Task 4/5 (embedding) de nhat quan.
+
+    Returns:
+        (ragas_llm, ragas_embeddings) — truyen vao evaluate(llm=..., embeddings=...)
+    """
+    from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+    from ragas.llms import LangchainLLMWrapper
+    from ragas.embeddings import LangchainEmbeddingsWrapper
+    from src.task10_generation import LLM_MODEL
+    from src.task4_chunking_indexing import EMBEDDING_MODEL
+
+    chat = ChatOpenAI(model=LLM_MODEL, api_key=os.getenv("OPENAI_API_KEY"), temperature=0)
+    embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL, api_key=os.getenv("OPENAI_API_KEY"))
+    return LangchainLLMWrapper(chat), LangchainEmbeddingsWrapper(embeddings)
 
 
 # =============================================================================
@@ -117,10 +159,13 @@ def evaluate_with_ragas(rag_pipeline, golden_dataset: list[dict]):
         eval_data["contexts"].append([c["content"] for c in result["sources"]])
         eval_data["ground_truth"].append(item["expected_answer"])
 
+    ragas_llm, ragas_embeddings = get_ragas_judge()
     dataset = Dataset.from_dict(eval_data)
     result = evaluate(
         dataset,
         metrics=[faithfulness, answer_relevancy, context_recall, context_precision],
+        llm=ragas_llm,
+        embeddings=ragas_embeddings,
     )
     return result.to_pandas()
 
@@ -175,7 +220,7 @@ def _generate_for_config(query: str, top_k: int, use_reranking: bool) -> dict:
     """
     from src.task9_retrieval_pipeline import retrieve
     from src.task10_generation import (
-        SYSTEM_PROMPT, LLM_MODEL, TEMPERATURE, TOP_P,
+        SYSTEM_PROMPT, LLM_MODEL, TEMPERATURE, TOP_P, MAX_TOKENS,
         reorder_for_llm, format_context,
     )
     from openai import OpenAI
@@ -184,17 +229,22 @@ def _generate_for_config(query: str, top_k: int, use_reranking: bool) -> dict:
     reordered = reorder_for_llm(chunks) if chunks else []
     context = format_context(reordered) if reordered else ""
 
-    api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
-    client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
-    response = client.chat.completions.create(
-        model=LLM_MODEL,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Context:\n{context}\n\n---\n\nQuestion: {query}"},
-        ],
-        temperature=TEMPERATURE,
-        top_p=TOP_P,
-    )
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    @_rate_limit_retry
+    def _call():
+        return client.chat.completions.create(
+            model=LLM_MODEL,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": f"Context:\n{context}\n\n---\n\nQuestion: {query}"},
+            ],
+            temperature=TEMPERATURE,
+            top_p=TOP_P,
+            max_tokens=MAX_TOKENS,
+        )
+
+    response = _call()
     return {"answer": response.choices[0].message.content, "sources": chunks}
 
 
@@ -219,6 +269,7 @@ def compare_configs(golden_dataset: list[dict]) -> dict:
         "dense_only": False,
     }
 
+    ragas_llm, ragas_embeddings = get_ragas_judge()
     results = {}
     for config_name, use_reranking in configs.items():
         eval_data = {"question": [], "answer": [], "contexts": [], "ground_truth": []}
@@ -233,6 +284,8 @@ def compare_configs(golden_dataset: list[dict]) -> dict:
         scored = evaluate(
             dataset,
             metrics=[faithfulness, answer_relevancy, context_recall, context_precision],
+            llm=ragas_llm,
+            embeddings=ragas_embeddings,
         )
         results[config_name] = scored.to_pandas()
 
@@ -313,6 +366,43 @@ def export_results(results, comparison: dict) -> None:
     print(f"✓ Exported: {RESULTS_PATH}")
 
 
+# =============================================================================
+# Run History — luu snapshot rieng moi lan chay, khong bi ghi de nhu results.md
+# =============================================================================
+
+RUNS_DIR = Path(__file__).parent / "runs"
+
+
+def save_run_snapshot(results, comparison: dict, sample_size: int) -> Path:
+    """
+    Luu toan bo diem so chi tiet (tung cau hoi, tung config) cua 1 lan chay ra
+    file JSON rieng co timestamp — dung de so sanh lich su cac lan chay, khong
+    bi mat khi results.md bi ghi de o lan chay tiep theo.
+
+    Returns:
+        Path den file snapshot vua ghi.
+    """
+    from datetime import datetime
+
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    snapshot_path = RUNS_DIR / f"eval_run_{timestamp}.json"
+
+    snapshot = {
+        "timestamp": datetime.now().isoformat(),
+        "sample_size": sample_size,
+        "default_run": results.to_dict(orient="records"),
+        "comparison": {
+            name: df.to_dict(orient="records") for name, df in comparison.items()
+        },
+    }
+    snapshot_path.write_text(
+        json.dumps(snapshot, ensure_ascii=False, indent=2, default=str), encoding="utf-8"
+    )
+    print(f"✓ Saved run snapshot: {snapshot_path}")
+    return snapshot_path
+
+
 if __name__ == "__main__":
     from src import task10_generation as pipeline
 
@@ -322,3 +412,4 @@ if __name__ == "__main__":
     results_df = evaluate_with_ragas(pipeline, golden_dataset)
     comparison_dfs = compare_configs(golden_dataset)
     export_results(results_df, comparison_dfs)
+    save_run_snapshot(results_df, comparison_dfs, sample_size=len(golden_dataset))
