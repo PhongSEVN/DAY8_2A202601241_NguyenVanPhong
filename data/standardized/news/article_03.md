@@ -1,6 +1,7 @@
 # AI-driven trade fraud raises alarm for Vietnamese exporters
 
 **Source:** https://www.rmit.edu.vn/news/all-news/2026/jun/ai-driven-trade-fraud-raises-alarm-for-vietnamese-exporters
+
 **Crawled:** 2026-08-04T00:00:00
 
 ---
