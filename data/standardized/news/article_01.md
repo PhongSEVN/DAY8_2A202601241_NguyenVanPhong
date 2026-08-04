@@ -1,6 +1,7 @@
 # RMIT achieves its best result in 20 years in QS World University Rankings
 
 **Source:** https://www.rmit.edu.vn/news/all-news/2026/jun/rmit-achieves-its-best-result-in-20-years-in-qs-world-university-rankings
+
 **Crawled:** 2026-08-04T00:00:00
 
 ---

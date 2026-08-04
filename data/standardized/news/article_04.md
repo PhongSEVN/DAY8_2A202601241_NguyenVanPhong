@@ -1,6 +1,7 @@
 # The hidden psychology behind older consumers' digital payment choices
 
 **Source:** https://www.rmit.edu.vn/news/all-news/2026/aug/the-hidden-psychology-behind-older-consumers-digital-payment-choices
+
 **Crawled:** 2026-08-04T00:00:00
 
 ---

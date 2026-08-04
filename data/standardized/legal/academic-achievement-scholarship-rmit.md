@@ -247,4 +247,3 @@ or other issues not specifically stated in a scholarship offer or in this
 document.
 
 5
-

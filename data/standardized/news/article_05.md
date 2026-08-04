@@ -1,6 +1,7 @@
 # RMIT student finds global purpose at UN leadership program
 
 **Source:** https://www.rmit.edu.vn/news/all-news/2026/jul/rmit-student-finds-global-purpose-at-un-leadership-program
+
 **Crawled:** 2026-08-04T00:00:00
 
 ---
