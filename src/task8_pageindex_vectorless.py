@@ -32,12 +32,13 @@ load_dotenv()
 
 PAGEINDEX_API_KEY = os.getenv("PAGEINDEX_API_KEY", "")
 STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
-DOC_IDS_CACHE = Path(__file__).parent.parent / "data" / "landing" / ".pageindex_doc_ids.json"
+DOC_IDS_CACHE = Path(__file__).parent.parent / "data" / "landing" / "pageindex_doc_ids.json"
 
 
 def _md_to_pdf(md_path: Path, out_dir: Path) -> Path:
     """Convert markdown sang PDF đơn giản bằng fpdf2 (PageIndex chỉ nhận PDF)."""
     from fpdf import FPDF
+    from fpdf.enums import XPos, YPos
 
     out_dir.mkdir(parents=True, exist_ok=True)
     pdf_path = out_dir / (md_path.stem + ".pdf")
@@ -47,7 +48,16 @@ def _md_to_pdf(md_path: Path, out_dir: Path) -> Path:
     pdf.set_font("Helvetica", size=11)
     text = md_path.read_text(encoding="utf-8")
     for line in text.splitlines():
-        pdf.multi_cell(0, 6, line.encode("latin-1", "replace").decode("latin-1"))
+        # new_x=LMARGIN bat buoc: mac dinh multi_cell de x o mep phai sau moi
+        # lan goi (new_x=XPos.RIGHT), nen tu dong thu 2 tro di w=0 ("het chieu
+        # rong con lai tinh tu x hien tai") = 0mm that su -> FPDFException "not
+        # enough horizontal space" voi BAT KY noi dung nao, khong rieng gi dong dai.
+        pdf.multi_cell(
+            0, 6,
+            line.encode("latin-1", "replace").decode("latin-1"),
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
     pdf.output(str(pdf_path))
     return pdf_path
 
@@ -67,7 +77,7 @@ def upload_documents() -> dict:
         raise RuntimeError("PAGEINDEX_API_KEY chưa được set trong .env")
 
     client = PageIndexClient(api_key=PAGEINDEX_API_KEY)
-    pdf_dir = STANDARDIZED_DIR.parent / "landing" / "_pageindex_pdf"
+    pdf_dir = STANDARDIZED_DIR.parent / "landing" / "pageindex_pdfs"
 
     doc_ids = {}
     for md_file in STANDARDIZED_DIR.rglob("*.md"):
