@@ -88,6 +88,11 @@ Client (React/Vite) → FastAPI (server.py)
 
 | Thành viên | MSSV | Nhiệm vụ | Trạng thái |
 |-----------|------|----------|------------|
+| Nguyễn Văn Phong (Leader) | 2A202601241 | Role 1 — RAG Architect: điều phối, chốt tham số chunking/RRF, ghép `supervisor.py` + Task 9, review pytest | |
+| Nguyễn Thanh Phúc | 2A202601345 | Role 2 — Data & Dense Search: Task 1, 3, 4 (Chunking/ChromaDB), Task 5 (Semantic Search) | |
+| Lê Thị Yến Nhi | 2A202601031 | Role 3 — Sparse Search & Reranking: Task 6 (BM25), Task 7 (RRF), Task 8 (PageIndex Fallback) | |
+| Vũ Huy Hoàng | 2A202601057 | Role 4 — Frontend & Chatbot: Task 2 (crawl news), Task 10 (Generation+Citation), `app.py`/React client | |
+| Phạm Khánh Linh | 2A202601507 | Role 5 — Evaluation & QA: `golden_dataset.json`, `eval_pipeline.py`, `results.md`, kiểm thử fallback | |
 | | | | |
 | | | | |
 | | | | |
