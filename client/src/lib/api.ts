@@ -37,7 +37,7 @@ export class ApiError extends Error {
   }
 }
 
-export async function queryLegalAssistant(
+export async function queryUniversityAssistant(
   question: string,
   conversationHistory: ConversationTurn[] = [],
 ): Promise<QueryResult> {

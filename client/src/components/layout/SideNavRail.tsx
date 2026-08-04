@@ -29,8 +29,8 @@ const SideNavRail: React.FC = () => {
     >
       <div className="nav-top">
         <div className="nav-brand">
-          <span className="material-symbols-outlined logo-icon">gavel</span>
-          <span className="font-headline-md nav-label brand-name">Trợ lý Pháp lý</span>
+          <span className="material-symbols-outlined logo-icon">school</span>
+          <span className="font-headline-md nav-label brand-name">Trợ lý Đại học</span>
         </div>
 
         <nav className="nav-links">

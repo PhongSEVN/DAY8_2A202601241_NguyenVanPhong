@@ -12,7 +12,7 @@ const PromptBar: React.FC<PromptBarProps> = ({
   variant = 'default',
   onSend,
   isLoading = false,
-  placeholder = 'Hỏi về quy định pháp luật...',
+  placeholder = 'Hỏi về học phí, học bổng, ký túc xá, đăng ký học phần...',
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -84,7 +84,7 @@ const PromptBar: React.FC<PromptBarProps> = ({
 
       <div className="prompt-footer-container">
         <p className="prompt-footer font-label-sm">
-          Trợ lý AI có thể mắc sai sót. Không thay thế tư vấn pháp lý chuyên nghiệp.
+          Trợ lý AI có thể mắc sai sót. Không thay thế thông báo chính thức từ trường.
         </p>
       </div>
     </div>

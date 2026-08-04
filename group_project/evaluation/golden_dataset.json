@@ -1,17 +1,82 @@
 [
   {
-    "question": "Học phí hàng năm của chương trình Business tại RMIT Vietnam là bao nhiêu?",
-    "expected_answer": "Khoảng 375.840.000 VND mỗi năm (tùy chương trình cụ thể).",
-    "expected_context": "Trang Tuition Fees, mục Undergraduate Programs"
+    "question": "RMIT xếp hạng bao nhiêu trong bảng QS World University Rankings 2027?",
+    "expected_answer": "RMIT xếp hạng đồng 119 (equal 119th) trong QS World University Rankings 2027, kết quả cao nhất trong 20 năm qua.",
+    "expected_context": "news/article_01 - RMIT achieves its best result in 20 years in QS World University Rankings"
   },
   {
-    "question": "Học phí được thanh toán theo hình thức nào?",
-    "expected_answer": "Thanh toán theo từng học kỳ, tính theo từng môn học đã đăng ký.",
-    "expected_context": "Trang Tuition Fees, mục Payment Structure"
+    "question": "RMIT đứng thứ mấy trong số các trường đại học Úc theo QS WUR?",
+    "expected_answer": "RMIT đứng thứ 10 trong số các trường đại học Úc theo hệ thống QS WUR.",
+    "expected_context": "news/article_01 - RMIT achieves its best result in 20 years in QS World University Rankings"
   },
   {
-    "question": "Trường có cung cấp ký túc xá trong khuôn viên không?",
-    "expected_answer": "Không — trường không cung cấp chỗ ở trong khuôn viên, nhưng có đội ngũ hỗ trợ sinh viên tìm chỗ ở gần trường.",
-    "expected_context": "Trang Accommodation Services"
+    "question": "Automation bias là gì theo bài viết của TS Nhật Quang Trần?",
+    "expected_answer": "Automation bias là xu hướng con người tin tưởng đề xuất của máy móc hơn phán đoán của chính mình, ngay cả khi có bằng chứng trái ngược.",
+    "expected_context": "news/article_02 - Living safely with AI: the danger of automation bias"
+  },
+  {
+    "question": "Luật về AI của Việt Nam có hiệu lực từ khi nào theo bài viết về automation bias?",
+    "expected_answer": "Luật Trí tuệ nhân tạo đầu tiên của Việt Nam có hiệu lực từ ngày 1/3/2026.",
+    "expected_context": "news/article_02 - Living safely with AI: the danger of automation bias"
+  },
+  {
+    "question": "Một doanh nghiệp Việt Nam bị thiệt hại bao nhiêu trong vụ lừa đảo thương mại được nhắc đến gần đây?",
+    "expected_answer": "Thiệt hại gần 72.000 USD do kẻ gian lợi dụng lòng tin kỹ thuật số trong quá trình đàm phán.",
+    "expected_context": "news/article_03 - AI-driven trade fraud raises alarm for Vietnamese exporters"
+  },
+  {
+    "question": "Giá trị thương mại của Việt Nam đã vượt bao nhiêu vào năm 2025?",
+    "expected_answer": "Vượt 930 tỷ USD vào năm 2025.",
+    "expected_context": "news/article_03 - AI-driven trade fraud raises alarm for Vietnamese exporters"
+  },
+  {
+    "question": "Yếu tố tâm lý nào khiến người cao tuổi ngại dùng thanh toán số theo nghiên cứu của TS Jasper Teow?",
+    "expected_answer": "Ageing-related helplessness — cảm giác mất khả năng thích ứng với thử thách mới khi già đi.",
+    "expected_context": "news/article_04 - The hidden psychology behind older consumers' digital payment choices"
+  },
+  {
+    "question": "Giao dịch thanh toán không dùng tiền mặt tại Việt Nam tăng bao nhiêu % trong 5 tháng đầu năm 2026?",
+    "expected_answer": "Tăng hơn 34% so với cùng kỳ năm trước, theo số liệu Ngân hàng Nhà nước.",
+    "expected_context": "news/article_04 - The hidden psychology behind older consumers' digital payment choices"
+  },
+  {
+    "question": "Sinh viên nào của RMIT Vietnam đại diện Việt Nam tại International Leadership Program 2026 ở Bangkok?",
+    "expected_answer": "Nguyễn Thanh Trúc, sinh viên ngành Cử nhân Ngôn ngữ (Bachelor of Languages).",
+    "expected_context": "news/article_05 - RMIT student finds global purpose at UN leadership program"
+  },
+  {
+    "question": "Trúc nhận giải thưởng gì tại chương trình lãnh đạo quốc tế ở Bangkok?",
+    "expected_answer": "Global Peace Award, trao cho các đại biểu tích cực tham gia thảo luận và hoạt động trong suốt sự kiện.",
+    "expected_context": "news/article_05 - RMIT student finds global purpose at UN leadership program"
+  },
+  {
+    "question": "Tài liệu nào quy định chi tiết học phí và các khoản phí khác tại RMIT Vietnam?",
+    "expected_answer": "Student Fees and Charges Guide 2026, bao gồm học phí và các phí phi học thuật như bảo hiểm, phí học bạ, phí tốt nghiệp.",
+    "expected_context": "legal/tuition-fees-rmit.pdf - Student Fees and Charges Guide 2026"
+  },
+  {
+    "question": "Điều khoản và điều kiện học bổng của RMIT Vietnam được quy định trong tài liệu nào?",
+    "expected_answer": "RMIT University Vietnam Scholarship Terms and Conditions.",
+    "expected_context": "legal/academic-achievement-scholarship-rmit.pdf - Scholarship Terms and Conditions"
+  },
+  {
+    "question": "Lịch học 2026 của RMIT (ngày bắt đầu/kết thúc học kỳ) được công bố ở tài liệu nào?",
+    "expected_answer": "2026 Academic Calendar, công bố công khai trên trang rmit.edu.vn.",
+    "expected_context": "legal/academic-calendar-rmit.pdf - 2026 Academic Calendar"
+  },
+  {
+    "question": "RMIT xếp hạng thứ mấy toàn cầu về Architecture/Built Environment trong QS Rankings by Subject 2026?",
+    "expected_answer": "Hạng 15 toàn cầu về Architecture/Built Environment.",
+    "expected_context": "news/article_01 - RMIT achieves its best result in 20 years in QS World University Rankings"
+  },
+  {
+    "question": "Thủ đô của nước Pháp là gì?",
+    "expected_answer": "Tôi không thể xác minh thông tin này từ nguồn hiện có — câu hỏi nằm ngoài phạm vi kho tài liệu dịch vụ đại học.",
+    "expected_context": "N/A - câu hỏi ngoài domain, dùng để test PageIndex fallback (Task 9)"
+  },
+  {
+    "question": "Công thức tính diện tích hình tròn là gì?",
+    "expected_answer": "Tôi không thể xác minh thông tin này từ nguồn hiện có — câu hỏi nằm ngoài phạm vi kho tài liệu dịch vụ đại học.",
+    "expected_context": "N/A - câu hỏi ngoài domain, dùng để test PageIndex fallback (Task 9)"
   }
 ]

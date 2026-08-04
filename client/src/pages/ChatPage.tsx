@@ -6,7 +6,7 @@ import CitationList from '../components/chat/CitationList';
 import MarkdownContent from '../components/chat/MarkdownContent';
 import SuggestionChip from '../components/shared/SuggestionChip';
 import PromptBar from '../components/shared/PromptBar';
-import { queryLegalAssistant, ApiError, type Citation } from '../lib/api';
+import { queryUniversityAssistant, ApiError, type Citation } from '../lib/api';
 import './ChatPage.css';
 
 interface ChatMessage {
@@ -18,9 +18,9 @@ interface ChatMessage {
 }
 
 const STARTER_QUESTIONS = [
-  'Điều kiện thành lập doanh nghiệp tư nhân là gì?',
-  'Mức xử phạt vi phạm giao thông đường bộ mới nhất?',
-  'Quy định về hợp đồng lao động thời vụ',
+  'Học phí tại RMIT Vietnam là bao nhiêu?',
+  'Điều kiện xin học bổng Academic Achievement?',
+  'Cách đăng ký học phần qua myRMIT?',
 ];
 
 function createMessageId(): string {
@@ -60,7 +60,7 @@ const ChatPage: React.FC = () => {
         role: message.role,
         content: message.content,
       }));
-      const result = await queryLegalAssistant(question, conversationHistory);
+      const result = await queryUniversityAssistant(question, conversationHistory);
       setMessages((prev) => [
         ...prev,
         {
@@ -106,7 +106,7 @@ const ChatPage: React.FC = () => {
     <div className="chat-page-container">
       <div className="chat-header">
         <div className="chat-title">
-          <span className="font-headline-md font-medium text-on-surface">Trợ lý Pháp lý AI</span>
+          <span className="font-headline-md font-medium text-on-surface">Trợ lý Dịch vụ Đại học AI</span>
         </div>
       </div>
 
@@ -115,7 +115,7 @@ const ChatPage: React.FC = () => {
           {!hasMessages && (
             <div className="chat-empty-state">
               <p className="font-body-md text-on-surface-variant">
-                Đặt câu hỏi về pháp luật Việt Nam để bắt đầu.
+                Đặt câu hỏi về chính sách và dịch vụ đại học để bắt đầu.
               </p>
               <div className="chip-row">
                 {STARTER_QUESTIONS.map((question) => (

@@ -28,7 +28,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ isUser, children }) => {
             className="material-symbols-outlined"
             style={{ fontSize: '20px', color: 'var(--on-primary)' }}
           >
-            gavel
+            school
           </span>
         </div>
       )}

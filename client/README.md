@@ -19,8 +19,9 @@ implement" thay vì lỗi — UI vẫn test được luôn không cần chờ ba
 TODO còn lại (Role 4 — Vũ Huy Hoàng):
 - `server.py`: nối `req.conversation_history` vào `generate_with_citation()` để có
   multi-turn memory thật (hiện field này nhận nhưng chưa dùng).
-- Chỉnh copy UI: `ChatPage.tsx` đang để placeholder "Trợ lý Pháp lý AI" + câu hỏi
-  gợi ý về luật (từ project cũ) — đổi sang theme University Services.
+- Copy UI đã đổi từ theme "Trợ lý Pháp lý" (project cũ) sang University Services
+  (title, brand name, placeholder, starter questions, icon `gavel` → `school`/
+  `description`) — review lại text/màu sắc cho khớp branding trường nếu cần.
 
 ---
 

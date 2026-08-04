@@ -11,12 +11,13 @@ const SettingsPage: React.FC = () => {
 
         <div className="settings-card">
           <h3 className="font-label-md uppercase tracking-wider text-on-surface-variant">
-            Về Trợ lý Pháp lý AI
+            Về Trợ lý Dịch vụ Đại học AI
           </h3>
           <p className="font-body-md text-on-surface-variant settings-description">
-            Trợ lý AI tra cứu quy định pháp luật Việt Nam, trả lời có trích dẫn nguồn từ văn bản
-            pháp luật thật. Câu trả lời có thể chưa đầy đủ hoặc mắc sai sót — không thay thế tư
-            vấn pháp lý chuyên nghiệp.
+            Trợ lý AI tra cứu chính sách và dịch vụ đại học (học phí, học bổng, ký túc xá,
+            thư viện, đăng ký học phần), trả lời có trích dẫn nguồn từ văn bản thật. Câu trả
+            lời có thể chưa đầy đủ hoặc mắc sai sót — không thay thế thông báo chính thức từ
+            phòng ban nhà trường.
           </p>
         </div>
       </div>

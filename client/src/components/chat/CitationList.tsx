@@ -25,7 +25,7 @@ function CitationList({ citations }: CitationListProps) {
               className="citation-header"
               onClick={() => setExpandedId(isExpanded ? null : key)}
             >
-              <span className="material-symbols-outlined citation-icon">gavel</span>
+              <span className="material-symbols-outlined citation-icon">description</span>
               <span className="citation-label">{citation.label}</span>
               <span className="material-symbols-outlined citation-chevron">
                 {isExpanded ? 'expand_less' : 'expand_more'}
