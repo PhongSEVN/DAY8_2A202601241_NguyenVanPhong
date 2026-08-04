@@ -72,9 +72,9 @@ def semantic_search(query: str, top_k: int = 10) -> list[dict]:
     )
 
     output = []
-    documents = results.get("documents", [[]])[0]
-    metadatas = results.get("metadatas", [[]])[0]
-    distances = results.get("distances", [[]])[0]
+    documents = (results.get("documents") or [[]])[0]
+    metadatas = (results.get("metadatas") or [[]])[0]
+    distances = (results.get("distances") or [[]])[0]
 
     for content, metadata, distance in zip(documents, metadatas, distances):
         output.append({
