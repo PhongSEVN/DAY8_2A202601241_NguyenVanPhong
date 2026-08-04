@@ -40,9 +40,9 @@ CHROMA_DIR = Path(__file__).parent.parent / "chroma_db"
 # CONFIGURATION — Giải thích lựa chọn của bạn trong comment
 # =============================================================================
 
-# TODO: Chọn chunking strategy và giải thích vì sao
-CHUNK_SIZE = 500        # Vì sao chọn 500? ...
-CHUNK_OVERLAP = 50      # Vì sao chọn 50? ...
+# Chốt bởi Role 1 (RAG Architect) — thống nhất toàn team, khớp LAB_GUIDE checkpoint 2.
+CHUNK_SIZE = 800        # Đủ ngữ cảnh cho 1 điều khoản/mục chính sách, không quá dài để loãng embedding.
+CHUNK_OVERLAP = 100     # ~12.5% overlap, tránh cắt đôi câu quan trọng ở ranh giới 2 đoạn.
 CHUNKING_METHOD = "recursive"  # "recursive" | "markdown_header" | "semantic"
 
 # TODO: Chọn embedding model và giải thích
